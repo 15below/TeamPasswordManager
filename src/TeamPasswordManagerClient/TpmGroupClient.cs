@@ -2,79 +2,80 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TeamPasswordManagerClient
 {
     public interface ITpmGroupClient
     {
-        void AddUserToGroup(int groupId, int userId);
-        int CreateGroup(string name);
-        void DeleteGroup(int groupId);
-        GroupDetails GetGroup(int groupId);
-        List<Group> ListAllGroups();
-        List<Group> ListGroups(int page = 1);
-        void RemoveUserFromGroup(int groupId, int userId);
-        void UpdateGroup(int groupId, string name);
+        Task AddUserToGroup(int groupId, int userId);
+        Task<int> CreateGroup(string name);
+        Task DeleteGroup(int groupId);
+        Task<GroupDetails> GetGroup(int groupId);
+        Task<IEnumerable<Group>> ListAllGroups(int pageSize = 20);
+        Task<IEnumerable<Group>> ListGroups(int page = 1);
+        Task RemoveUserFromGroup(int groupId, int userId);
+        Task UpdateGroup(int groupId, string name);
     }
 
-    public class TpmGroupClient : TpmBase, ITpmGroupClient
+    internal class TpmGroupClient : TpmBase, ITpmGroupClient
     {
         public TpmGroupClient(TpmConfig config) : base(config)
         {
         }
 
-        public List<Group> ListAllGroups()
+        public async Task<IEnumerable<Group>> ListAllGroups(int pageSize = 20)
         {
-            return FetchAllPages((page) => ListGroups(page), 20);
+            return await FetchAllPages(ListGroups, pageSize);
         }
 
-        public List<Group> ListGroups(int page = 1)
+        public async Task<IEnumerable<Group>> ListGroups(int page = 1)
         {
-            var response = (page == 1) ? Get("api/v4/groups.json") : Get($"api/v4/groups/page/{page}.json");
+            var response = (page == 1) ? await Get("api/v4/groups.json") : await Get($"api/v4/groups/page/{page}.json");
             return JsonConvert.DeserializeObject<List<Group>>(response);
         }
 
-        public GroupDetails GetGroup(int groupId)
+        public async Task<GroupDetails> GetGroup(int groupId)
         {
-            var response = Get($"api/v4/groups/{groupId}.json");
+            var response = await Get($"api/v4/groups/{groupId}.json");
             return JsonConvert.DeserializeObject<GroupDetails>(response);
         }
 
-        public int CreateGroup(string name)
+        public async Task<int> CreateGroup(string name)
         {
             var body = JsonConvert.SerializeObject(new
             {
                 name = name
             });
 
-            var response = Post("api/v4/groups.json", body);
+            var response = await Post("api/v4/groups.json", body);
             var created = JsonConvert.DeserializeObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
-        public void UpdateGroup(int groupId, string name)
+        public async Task UpdateGroup(int groupId, string name)
         {
             var body = JsonConvert.SerializeObject(new
             {
                 name = name
             });
 
-            Put($"api/v4/groups/{groupId}.json", body);
+            await Put($"api/v4/groups/{groupId}.json", body);
         }
 
-        public void AddUserToGroup(int groupId, int userId)
+        public async Task AddUserToGroup(int groupId, int userId)
         {
-            Put($"api/v4/groups/{groupId}/add_user/{userId}.json");
+            await Put($"api/v4/groups/{groupId}/add_user/{userId}.json");
         }
 
-        public void RemoveUserFromGroup(int groupId, int userId)
+        public async Task RemoveUserFromGroup(int groupId, int userId)
         {
-            Put($"api/v4/groups/{groupId}/delete_user/{userId}.json");
+            await Put($"api/v4/groups/{groupId}/delete_user/{userId}.json");
         }
 
-        public void DeleteGroup(int groupId)
+        public async Task DeleteGroup(int groupId)
         {
-            Delete($"api/v4/groups/{groupId}.json");
+            await Delete($"api/v4/groups/{groupId}.json");
         }
     }
 }

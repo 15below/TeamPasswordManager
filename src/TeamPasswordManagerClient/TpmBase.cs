@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TeamPasswordManagerClient
 {
@@ -20,36 +22,34 @@ namespace TeamPasswordManagerClient
             this.baseUrl = config.BaseUrl;
         }
 
-        protected string Get(string url)
+        protected async Task<string> Get(string url)
         {
             var request = BuildRequest("GET", url);
-            return ReadResponse(request);
+            return await ReadResponse(request);
         }
 
-        protected string Delete(string url)
+        protected async Task<string> Delete(string url)
         {
             var request = BuildRequest("DELETE", url);
-            return ReadResponse(request);
+            return await ReadResponse(request);
         }
 
-        protected string Post(string url, string body)
+        protected async Task<string> Post(string url, string body)
         {
             var request = BuildRequest("POST", url, body);
-            AddBody(body, request);
-            return ReadResponse(request);
+            return await ReadResponse(request);
         }
 
-        protected string Put(string url)
+        protected async Task<string> Put(string url)
         {
             var request = BuildRequest("PUT", url);
-            return ReadResponse(request);
+            return await ReadResponse(request);
         }
 
-        protected string Put(string url, string body)
+        protected async Task<string> Put(string url, string body)
         {
             var request = BuildRequest("PUT", url, body);
-            AddBody(body, request);
-            return ReadResponse(request);
+            return await ReadResponse(request);
         }
 
         protected WebRequest BuildRequest(string method, string url)
@@ -73,30 +73,28 @@ namespace TeamPasswordManagerClient
             request.Headers.Add("X-Public-Key", publicKey);
             request.Headers.Add("X-Request-Hash", Hash(timestamp, url, body));
             request.Headers.Add("X-Request-Timestamp", timestamp.ToString());
-            return request;
-        }
 
-        protected static void AddBody(string body, WebRequest request)
-        {
             using (var streamWriter = new StreamWriter(request.GetRequestStream()))
             {
                 streamWriter.Write(body);
                 streamWriter.Flush();
                 streamWriter.Close();
             }
+
+            return request;
         }
 
-        protected static string ReadResponse(WebRequest request)
+        protected static async Task<string> ReadResponse(WebRequest request)
         {
-            var httpResponse = request.GetResponse();
+            var httpResponse = await request.GetResponseAsync();
 
             using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
             {
-                return streamReader.ReadToEnd();
+                return await streamReader.ReadToEndAsync();
             }
         }
 
-        protected List<T> FetchAllPages<T>(Func<int, List<T>> getPage, int pageSize = 20)
+        protected async Task<IEnumerable<T>> FetchAllPages<T>(Func<int, Task<IEnumerable<T>>> getPage, int pageSize = 20)
         {
             List<T> all = new List<T>();
             List<T> current;
@@ -104,7 +102,7 @@ namespace TeamPasswordManagerClient
 
             do
             {
-                current = getPage(page);
+                current = (await getPage(page)).ToList();
 
                 all.AddRange(current);
 
