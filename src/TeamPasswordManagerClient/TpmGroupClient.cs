@@ -8,13 +8,63 @@ namespace TeamPasswordManagerClient
 {
     public interface ITpmGroupClient
     {
+        /// <summary>
+        /// Add a user to the group.
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task AddUserToGroup(int groupId, int userId);
+
+        /// <summary>
+        /// Create a new group. Will return a WebException (409) Conflict if there is an existing group with that name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         Task<int> CreateGroup(string name);
+
+        /// <summary>
+        /// Delete a group.
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
         Task DeleteGroup(int groupId);
+
+        /// <summary>
+        /// Get group details
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
         Task<GroupDetails> GetGroup(int groupId);
+
+        /// <summary>
+        /// List all groups.
+        /// </summary>
+        /// <param name="pageSize">The amount of passwords that TPM is configured to return (defaults to 20). http://teampasswordmanager.com/docs/api/#pagination</param>
+        /// <returns></returns>
         Task<IEnumerable<Group>> ListAllGroups(int pageSize = 20);
+
+        /// <summary>
+        /// Get a page of groups.
+        /// </summary>
+        /// <param name="page">Page number starting from 1</param>
+        /// <returns></returns>
         Task<IEnumerable<Group>> ListGroups(int page = 1);
+
+        /// <summary>
+        /// Remove a user from the group.
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task RemoveUserFromGroup(int groupId, int userId);
+
+        /// <summary>
+        /// Update a group name.
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         Task UpdateGroup(int groupId, string name);
     }
 

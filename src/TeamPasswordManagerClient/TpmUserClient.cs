@@ -8,18 +8,97 @@ namespace TeamPasswordManagerClient
 {
     public interface ITpmUserClient
     {
+        /// <summary>
+        /// Activate a deactivated user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task ActivateUser(int userId);
+
+        /// <summary>
+        /// Convert a normal user to an Active Directory login.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="loginDN"></param>
+        /// <returns></returns>
         Task ConvertToLdap(int userId, string loginDN);
+
+        /// <summary>
+        /// Convert an Active Directory user to a normal one.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task ConvertToNormal(int userId);
+
+        /// <summary>
+        /// Create a new Active Directory user.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         Task<int> CreateLdapUser(CreateLdapUserRequest request);
+
+        /// <summary>
+        /// Create a new normal user.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         Task<int> CreateNormalUser(CreateNormalUserRequest request);
+
+        /// <summary>
+        /// Deactivate a user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task DeactivateUser(int userId);
+
+        /// <summary>
+        /// Delete a user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task DeleteUser(int userId);
+
+        /// <summary>
+        /// Get user details.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task<UserDetails> GetUser(int userId);
+
+        /// <summary>
+        /// List all users.
+        /// </summary>
+        /// <param name="pageSize">The amount of passwords that TPM is configured to return (defaults to 20). http://teampasswordmanager.com/docs/api/#pagination</param>
+        /// <returns></returns>
         Task<IEnumerable<UserEntry>> ListAllUsers(int pageSize = 20);
+
+        /// <summary>
+        /// Get a page of users.
+        /// </summary>
+        /// <param name="page">Page number starting from 1</param>
+        /// <returns></returns>
         Task<IEnumerable<UserEntry>> ListUsers(int page = 1);
+
+        /// <summary>
+        /// Update a normal users' password.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         Task UpdatePassword(int userId, string password);
+
+        /// <summary>
+        /// Update a users' details (excluding password changes, <see cref="UpdatePassword(int, string)"/>).
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
         Task UpdateUser(int userId, UpdateUserRequest request);
+
+        /// <summary>
+        /// Return the current users' details.
+        /// </summary>
+        /// <returns></returns>
         Task<UserDetails> WhoAmI();
     }
 

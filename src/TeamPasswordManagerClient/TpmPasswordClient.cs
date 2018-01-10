@@ -10,15 +10,79 @@ namespace TeamPasswordManagerClient
 {
     public interface ITpmPasswordClient
     {
+        /// <summary>
+        /// Create a new password under the given project. If you want a securely generated password, <see cref="GeneratePassword"/>.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="projectId"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         Task<int> CreatePassword(string name, int projectId, string password);
+
+        /// <summary>
+        /// This deletes the password, its files, etc.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         Task DeletePassword(int id);
+
+        /// <summary>
+        /// Generate a secure password, that conforms to the required strength settings in TPM.
+        /// </summary>
+        /// <returns></returns>
         Task<string> GeneratePassword();
+
+        /// <summary>
+        /// Get the password details including the password value itself.
+        /// </summary>
+        /// <param name="passwordId"></param>
+        /// <returns></returns>
         Task<PasswordDetails> GetPassword(int passwordId);
+
+        /// <summary>
+        /// Search for a password entry by name.
+        /// </summary>
+        /// <param name="projectName">NOTE: Spaces in a project name will fail to return any results</param>
+        /// <param name="passwordName"></param>
+        /// <returns></returns>
         Task<PasswordEntry> SearchPassword(string projectName, string passwordName);
+
+        /// <summary>
+        /// Get all passwords within a project.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="pageSize">The amount of passwords that TPM is configured to return (defaults to 20). http://teampasswordmanager.com/docs/api/#pagination</param>
+        /// <returns></returns>
         Task<IEnumerable<PasswordEntry>> ListAllPasswords(int projectId, int pageSize = 20);
+
+        /// <summary>
+        /// Get a page of password entries for the given project.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="page">Page number starting from 1</param>
+        /// <returns></returns>
         Task<IEnumerable<PasswordEntry>> ListPasswords(int projectId, int page = 1);
+
+        /// <summary>
+        /// This sets the locking status of a password to locked. From this moment on, any user who wants to use it will have to supply a reason to unlock it.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         Task LockPassword(int id);
+
+        /// <summary>
+        /// This sets the locking status of a password to unlocked.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reason"></param>
+        /// <returns></returns>
         Task UnlockPassword(int id, string reason);
+
+        /// <summary>
+        /// Updates the password with the supplied details. Only non-null values will be applied.
+        /// </summary>
+        /// <param name="details"></param>
+        /// <returns></returns>
         Task UpdatePassword(PasswordDetails details);
     }
 
