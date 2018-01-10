@@ -8,7 +8,7 @@ namespace TeamPasswordManagerClient.DTOs
         public string Name;
         public string Password;
         public ProjectEntry Project;
-        public string Notes_Snippet;
+        public string Notes;
         public string Tags;
         public string Access_Info;
         public string Username;

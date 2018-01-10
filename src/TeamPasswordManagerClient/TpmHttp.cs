@@ -9,50 +9,50 @@ using System.Threading.Tasks;
 
 namespace TeamPasswordManagerClient
 {
-    public abstract class TpmBase
+    internal class TpmHttp
     {
         private readonly string publicKey;
         private readonly string privateKey;
         private readonly string baseUrl;
 
-        public TpmBase(TpmConfig config)
+        public TpmHttp(TpmConfig config)
         {
             this.publicKey = config.PublicKey;
             this.privateKey = config.PrivateKey;
             this.baseUrl = config.BaseUrl;
         }
 
-        protected async Task<string> Get(string url)
+        public async Task<string> Get(string url)
         {
             var request = BuildRequest("GET", url);
             return await ReadResponse(request);
         }
 
-        protected async Task<string> Delete(string url)
+        public async Task<string> Delete(string url)
         {
             var request = BuildRequest("DELETE", url);
             return await ReadResponse(request);
         }
 
-        protected async Task<string> Post(string url, string body)
+        public async Task<string> Post(string url, string body)
         {
             var request = BuildRequest("POST", url, body);
             return await ReadResponse(request);
         }
 
-        protected async Task<string> Put(string url)
+        public async Task<string> Put(string url)
         {
             var request = BuildRequest("PUT", url);
             return await ReadResponse(request);
         }
 
-        protected async Task<string> Put(string url, string body)
+        public async Task<string> Put(string url, string body)
         {
             var request = BuildRequest("PUT", url, body);
             return await ReadResponse(request);
         }
 
-        protected WebRequest BuildRequest(string method, string url)
+        public WebRequest BuildRequest(string method, string url)
         {
             var timestamp = CurrentTimeStamp();
             var request = WebRequest.Create(baseUrl + url);
@@ -64,7 +64,7 @@ namespace TeamPasswordManagerClient
             return request;
         }
 
-        protected WebRequest BuildRequest(string method, string url, string body)
+        public WebRequest BuildRequest(string method, string url, string body)
         {
             var timestamp = CurrentTimeStamp();
             var request = WebRequest.Create(baseUrl + url);
@@ -84,7 +84,7 @@ namespace TeamPasswordManagerClient
             return request;
         }
 
-        protected static async Task<string> ReadResponse(WebRequest request)
+        public async Task<string> ReadResponse(WebRequest request)
         {
             var httpResponse = await request.GetResponseAsync();
 
@@ -94,7 +94,7 @@ namespace TeamPasswordManagerClient
             }
         }
 
-        protected async Task<IEnumerable<T>> FetchAllPages<T>(Func<int, Task<IEnumerable<T>>> getPage, int pageSize = 20)
+        public async Task<IEnumerable<T>> FetchAllPages<T>(Func<int, Task<IEnumerable<T>>> getPage, int pageSize = 20)
         {
             List<T> all = new List<T>();
             List<T> current;

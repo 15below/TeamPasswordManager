@@ -3,7 +3,7 @@
     public interface ITpmClient
     {
         ITpmPasswordClient Passwords { get; }
-        ITpmPersonalPasswordClient PersonalPasswords { get; }
+        ITpmMyPasswordClient MyPasswords { get; }
         ITpmProjectClient Projects { get; }
         ITpmUserClient Users { get; }
         ITpmGroupClient Groups { get; }
@@ -12,13 +12,13 @@
     public class TpmClient : ITpmClient
     {
         public TpmClient(ITpmPasswordClient PasswordClient,
-                         ITpmPersonalPasswordClient PersonalPasswordClient,
+                         ITpmMyPasswordClient PersonalPasswordClient,
                          ITpmProjectClient ProjectClient,
                          ITpmUserClient UserClient,
                          ITpmGroupClient GroupClient)
         {
             this.Passwords = PasswordClient;
-            this.PersonalPasswords = PersonalPasswordClient;
+            this.MyPasswords = PersonalPasswordClient;
             this.Projects = ProjectClient;
             this.Users = UserClient;
             this.Groups = GroupClient;
@@ -26,16 +26,19 @@
 
         public TpmClient(TpmConfig config)
         {
-            this.Passwords = new TpmPasswordClient(config);
-            this.PersonalPasswords = new TpmPersonalPasswordClient(config);
-            this.Projects = new TpmProjectClient(config);
-            this.Users = new TpmUserClient(config);
-            this.Groups = new TpmGroupClient(config);
+            this.Http = new TpmHttp(config);
+            this.Passwords = new TpmPasswordClient(Http);
+            this.MyPasswords = new TpmMyPasswordClient(Http);
+            this.Projects = new TpmProjectClient(Http);
+            this.Users = new TpmUserClient(Http);
+            this.Groups = new TpmGroupClient(Http);
         }
+
+        internal TpmHttp Http { get; }
 
         public ITpmPasswordClient Passwords { get; private set; }
 
-        public ITpmPersonalPasswordClient PersonalPasswords { get; private set; }
+        public ITpmMyPasswordClient MyPasswords { get; private set; }
 
         public ITpmProjectClient Projects { get; private set; }
 

@@ -11,24 +11,24 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Activate a deactivated user.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task ActivateUser(int userId);
+        Task ActivateUser(int id);
 
         /// <summary>
         /// Convert a normal user to an Active Directory login.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <param name="loginDN"></param>
         /// <returns></returns>
-        Task ConvertToLdap(int userId, string loginDN);
+        Task ConvertToLdap(int id, string loginDN);
 
         /// <summary>
         /// Convert an Active Directory user to a normal one.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task ConvertToNormal(int userId);
+        Task ConvertToNormal(int id);
 
         /// <summary>
         /// Create a new Active Directory user.
@@ -47,23 +47,23 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Deactivate a user.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task DeactivateUser(int userId);
+        Task DeactivateUser(int id);
 
         /// <summary>
         /// Delete a user.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task DeleteUser(int userId);
+        Task DeleteUser(int id);
 
         /// <summary>
         /// Get user details.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task<UserDetails> GetUser(int userId);
+        Task<UserDetails> GetUser(int id);
 
         /// <summary>
         /// List all users.
@@ -82,18 +82,18 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Update a normal users' password.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        Task UpdatePassword(int userId, string password);
+        Task UpdatePassword(int id, string password);
 
         /// <summary>
         /// Update a users' details (excluding password changes, <see cref="UpdatePassword(int, string)"/>).
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="id"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task UpdateUser(int userId, UpdateUserRequest request);
+        Task UpdateUser(int id, UpdateUserRequest request);
 
         /// <summary>
         /// Return the current users' details.
@@ -102,119 +102,98 @@ namespace TeamPasswordManagerClient
         Task<UserDetails> WhoAmI();
     }
 
-    internal class TpmUserClient : TpmBase, ITpmUserClient
+    internal class TpmUserClient : ITpmUserClient
     {
-        public TpmUserClient(TpmConfig config) : base(config)
+        private readonly TpmHttp http;
+
+        public TpmUserClient(TpmHttp http)
         {
+            this.http = http;
         }
 
         public async Task<IEnumerable<UserEntry>> ListAllUsers(int pageSize = 20)
         {
-            return await FetchAllPages(ListUsers, pageSize);
+            return await http.FetchAllPages(ListUsers, pageSize);
         }
 
         public async Task<IEnumerable<UserEntry>> ListUsers(int page = 1)
         {
-            var response = (page == 1) ? await Get("api/v4/users.json") : await Get($"api/v4/users/page/{page}.json");
+            var response = (page == 1) ? await http.Get("api/v4/users.json") : await http.Get($"api/v4/users/page/{page}.json");
             return JsonConvert.DeserializeObject<List<UserEntry>>(response);
         }
 
-        public async Task<UserDetails> GetUser(int userId)
+        public async Task<UserDetails> GetUser(int id)
         {
-            var response = await Get($"api/v4/users/{userId}.json");
+            var response = await http.Get($"api/v4/users/{id}.json");
             return JsonConvert.DeserializeObject<UserDetails>(response);
         }
 
         public async Task<UserDetails> WhoAmI()
         {
-            var response = await Get($"api/v4/users/me.json");
+            var response = await http.Get($"api/v4/users/me.json");
             return JsonConvert.DeserializeObject<UserDetails>(response);
         }
 
         public async Task<int> CreateLdapUser(CreateLdapUserRequest request)
         {
-            var body = JsonConvert.SerializeObject(new
-            {
-                username = request.Username,
-                email_address = request.EmailAddress,
-                name = request.Name,
-                role = request.Role,
-                login_dn = request.LoginDN
-            });
-
-            var response = await Post("api/v4/users.json", body);
+            var body = JsonConvert.SerializeObject(request);
+            var response = await http.Post("api/v4/users.json", body);
             var created = JsonConvert.DeserializeObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task<int> CreateNormalUser(CreateNormalUserRequest request)
         {
-            var body = JsonConvert.SerializeObject(new
-            {
-                username = request.Username,
-                email_address = request.EmailAddress,
-                name = request.Name,
-                role = request.Role,
-                password = request.Password
-            });
-
-            var response = await Post("api/v4/users.json", body);
+            var body = JsonConvert.SerializeObject(request);
+            var response = await http.Post("api/v4/users.json", body);
             var created = JsonConvert.DeserializeObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
-        public async Task UpdateUser(int userId, UpdateUserRequest request)
+        public async Task UpdateUser(int id, UpdateUserRequest request)
         {
-            var body = JsonConvert.SerializeObject(new
-            {
-                username = request.Username,
-                email_address = request.EmailAddress,
-                name = request.Name,
-                role = request.Role,
-                login_dn = request.LoginDN
-            });
-
-            await Put($"api/v4/users/{userId}.json", body);
+            var body = JsonConvert.SerializeObject(request);
+            await http.Put($"api/v4/users/{id}.json", body);
         }
 
-        public async Task UpdatePassword(int userId, string password)
+        public async Task UpdatePassword(int id, string password)
         {
             var body = JsonConvert.SerializeObject(new
             {
                 password = password
             });
 
-            await Put($"api/v4/users/{userId}/change_password.json", body);
+            await http.Put($"api/v4/users/{id}/change_password.json", body);
         }
 
-        public async Task ActivateUser(int userId)
+        public async Task ActivateUser(int id)
         {
-            await Put($"api/v4/users/{userId}/activate.json");
+            await http.Put($"api/v4/users/{id}/activate.json");
         }
 
-        public async Task DeactivateUser(int userId)
+        public async Task DeactivateUser(int id)
         {
-            await Put($"api/v4/users/{userId}/deactivate.json");
+            await http.Put($"api/v4/users/{id}/deactivate.json");
         }
 
-        public async Task ConvertToLdap(int userId, string loginDN)
+        public async Task ConvertToLdap(int id, string loginDN)
         {
-            var body = JsonConvert.SerializeObject(new
+            var body = JsonConvert.SerializeObject(new ConvertToLdapRequest
             {
-                login_dn = loginDN
+                LoginDN = loginDN
             });
 
-            await Put($"api/v4/users/{userId}/convert_to_ldap.json", body);
+            await http.Put($"api/v4/users/{id}/convert_to_ldap.json", body);
         }
 
-        public async Task ConvertToNormal(int userId)
+        public async Task ConvertToNormal(int id)
         {
-            await Put($"api/v4/users/{userId}/convert_to_normal.json");
+            await http.Put($"api/v4/users/{id}/convert_to_normal.json");
         }
 
-        public async Task DeleteUser(int userId)
+        public async Task DeleteUser(int id)
         {
-            await Delete($"api/v4/users/{userId}.json");
+            await http.Delete($"api/v4/users/{id}.json");
         }
     }
 }

@@ -68,64 +68,67 @@ namespace TeamPasswordManagerClient
         Task UpdateGroup(int groupId, string name);
     }
 
-    internal class TpmGroupClient : TpmBase, ITpmGroupClient
+    internal class TpmGroupClient : ITpmGroupClient
     {
-        public TpmGroupClient(TpmConfig config) : base(config)
+        private readonly TpmHttp http;
+
+        public TpmGroupClient(TpmHttp http)
         {
+            this.http = http;
         }
 
         public async Task<IEnumerable<Group>> ListAllGroups(int pageSize = 20)
         {
-            return await FetchAllPages(ListGroups, pageSize);
+            return await http.FetchAllPages(ListGroups, pageSize);
         }
 
         public async Task<IEnumerable<Group>> ListGroups(int page = 1)
         {
-            var response = (page == 1) ? await Get("api/v4/groups.json") : await Get($"api/v4/groups/page/{page}.json");
+            var response = (page == 1) ? await http.Get("api/v4/groups.json") : await http.Get($"api/v4/groups/page/{page}.json");
             return JsonConvert.DeserializeObject<List<Group>>(response);
         }
 
         public async Task<GroupDetails> GetGroup(int groupId)
         {
-            var response = await Get($"api/v4/groups/{groupId}.json");
+            var response = await http.Get($"api/v4/groups/{groupId}.json");
             return JsonConvert.DeserializeObject<GroupDetails>(response);
         }
 
         public async Task<int> CreateGroup(string name)
         {
-            var body = JsonConvert.SerializeObject(new
+            var body = JsonConvert.SerializeObject(new CreateGroupRequest
             {
-                name = name
+                Name = name
             });
 
-            var response = await Post("api/v4/groups.json", body);
+            var response = await http.Post("api/v4/groups.json", body);
             var created = JsonConvert.DeserializeObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task UpdateGroup(int groupId, string name)
         {
-            var body = JsonConvert.SerializeObject(new
+            var body = JsonConvert.SerializeObject(new UpdateGroupRequest
             {
-                name = name
+                Name = name
             });
 
-            await Put($"api/v4/groups/{groupId}.json", body);
+            await http.Put($"api/v4/groups/{groupId}.json", body);
         }
 
         public async Task AddUserToGroup(int groupId, int userId)
         {
-            await Put($"api/v4/groups/{groupId}/add_user/{userId}.json");
+            await http.Put($"api/v4/groups/{groupId}/add_user/{userId}.json");
         }
 
         public async Task RemoveUserFromGroup(int groupId, int userId)
         {
-            await Put($"api/v4/groups/{groupId}/delete_user/{userId}.json");
+            await http.Put($"api/v4/groups/{groupId}/delete_user/{userId}.json");
         }
 
         public async Task DeleteGroup(int groupId)
         {
-            await Delete($"api/v4/groups/{groupId}.json");
+            await http.Delete($"api/v4/groups/{groupId}.json");
         }
     }
 }

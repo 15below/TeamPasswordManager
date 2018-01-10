@@ -13,11 +13,9 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Create a new password under the given project. If you want a securely generated password, <see cref="GeneratePassword"/>.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="projectId"></param>
-        /// <param name="password"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        Task<int> CreatePassword(string name, int projectId, string password);
+        Task<int> CreatePassword(CreatePasswordRequest request);
 
         /// <summary>
         /// This deletes the password, its files, etc.
@@ -81,37 +79,41 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Updates the password with the supplied details. Only non-null values will be applied.
         /// </summary>
-        /// <param name="details"></param>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        Task UpdatePassword(PasswordDetails details);
+        Task UpdatePassword(int id, UpdatePasswordRequest request);
     }
 
-    internal class TpmPasswordClient : TpmBase, ITpmPasswordClient
+    internal class TpmPasswordClient : ITpmPasswordClient
     {
-        public TpmPasswordClient(TpmConfig config) : base(config)
+        private readonly TpmHttp http;
+
+        public TpmPasswordClient(TpmHttp http)
         {
+            this.http = http;
         }
 
         public async Task<string> GeneratePassword()
         {
-            var response = await Get($"api/v4/generate_password.json");
+            var response = await http.Get($"api/v4/generate_password.json");
             return JsonConvert.DeserializeObject<GeneratedPassword>(response).Password;
         }
 
         public async Task<IEnumerable<PasswordEntry>> ListAllPasswords(int projectId, int pageSize = 20)
         {
-            return await FetchAllPages(async (page) => await ListPasswords(projectId, page), pageSize);
+            return await http.FetchAllPages(async (page) => await ListPasswords(projectId, page), pageSize);
         }
 
         public async Task<IEnumerable<PasswordEntry>> ListPasswords(int projectId, int page = 1)
         {
-            var response = (page == 1) ? await Get($"api/v4/projects/{projectId}/passwords.json") : await Get($"api/v4/projects/{projectId}/passwords/page/{page}.json");
+            var response = (page == 1) ? await http.Get($"api/v4/projects/{projectId}/passwords.json") : await http.Get($"api/v4/projects/{projectId}/passwords/page/{page}.json");
             return JsonConvert.DeserializeObject<List<PasswordEntry>>(response);
         }
 
         public async Task<PasswordDetails> GetPassword(int passwordId)
         {
-            var response = await Get($"api/v4/passwords/{passwordId}.json");
+            var response = await http.Get($"api/v4/passwords/{passwordId}.json");
             return JsonConvert.DeserializeObject<PasswordDetails>(response);
         }
 
@@ -119,7 +121,7 @@ namespace TeamPasswordManagerClient
         {
             var urlencodedProject = HttpUtility.UrlEncode($"[{projectName}]");
             var urlencodedPassword = HttpUtility.UrlEncode($"[{passwordName}]");
-            var response = await Get($"api/v4/passwords/search/in:{urlencodedProject}+name:{urlencodedPassword}.json");
+            var response = await http.Get($"api/v4/passwords/search/in:{urlencodedProject}+name:{urlencodedPassword}.json");
             var entry = JsonConvert.DeserializeObject<List<PasswordEntry>>(response).FirstOrDefault();
             if (entry == null)
             {
@@ -128,41 +130,35 @@ namespace TeamPasswordManagerClient
             return entry;
         }
 
-        public async Task<int> CreatePassword(string name, int projectId, string password)
+        public async Task<int> CreatePassword(CreatePasswordRequest request)
         {
-            var body = JsonConvert.SerializeObject(new
-            {
-                name = name,
-                project_id = projectId,
-                password = password
-            });
-
-            var response = await Post("api/v4/passwords.json", body);
+            var body = JsonConvert.SerializeObject(request);
+            var response = await http.Post("api/v4/passwords.json", body);
             var created = JsonConvert.DeserializeObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
-        public async Task UpdatePassword(PasswordDetails details)
+        public async Task UpdatePassword(int id, UpdatePasswordRequest details)
         {
             var body = JsonConvert.SerializeObject(details);
-            await Put($"api/v4/passwords/{details.Id}.json", body);
+            await http.Put($"api/v4/passwords/{id}.json", body);
         }
 
         public async Task LockPassword(int id)
         {
-            await Put($"api/v4/passwords/{id}/lock.json");
+            await http.Put($"api/v4/passwords/{id}/lock.json");
         }
 
         public async Task UnlockPassword(int id, string reason)
         {
-            var request = BuildRequest("PUT", $"api/v4/passwords/{id}/unlock.json");
+            var request = http.BuildRequest("PUT", $"api/v4/passwords/{id}/unlock.json");
             request.Headers.Add("X-Unlock-Reason", reason);
-            await ReadResponse(request);
+            await http.ReadResponse(request);
         }
 
         public async Task DeletePassword(int id)
         {
-            await Delete($"api/v4/passwords/{id}.json");
+            await http.Delete($"api/v4/passwords/{id}.json");
         }
     }
 }

@@ -28,12 +28,9 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Create a new project. Will return a WebException (409) Conflict if there is an existing project with that name in this location.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="parentId">ParentId of zero will place the project in the root</param>
-        /// <param name="tags">Comma-separated list of tags</param>
-        /// <param name="notes"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        Task<int> CreateProject(string name, int parentId = 0, string tags = null, string notes = null);
+        Task<int> CreateProject(CreateProjectRequest request);
 
         /// <summary>
         /// Delete a project. Will return a WebException (403) Forbidden if there are any sub-projects.
@@ -80,90 +77,81 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Updates the project with the supplied details. Only non-null values will be applied.
         /// </summary>
-        /// <param name="details"></param>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        Task UpdateProject(ProjectDetails details);
+        Task UpdateProject(int id, UpdateProjectRequest request);
     }
 
-    internal class TpmProjectClient : TpmBase, ITpmProjectClient
+    internal class TpmProjectClient : ITpmProjectClient
     {
-        public TpmProjectClient(TpmConfig config) : base(config)
+        private readonly TpmHttp http;
+
+        public TpmProjectClient(TpmHttp http)
         {
+            this.http = http;
         }
 
         public async Task<IEnumerable<ProjectEntry>> ListAllProjects(int pageSize = 20)
         {
-            return await FetchAllPages(ListProjects, pageSize);
+            return await http.FetchAllPages(ListProjects, pageSize);
         }
 
         public async Task<IEnumerable<ProjectEntry>> ListProjects(int page = 1)
         {
-            var response = (page == 1) ? await Get("api/v4/projects.json") : await Get($"api/v4/projects/page/{page}.json");
+            var response = (page == 1) ? await http.Get("api/v4/projects.json") : await http.Get($"api/v4/projects/page/{page}.json");
             return JsonConvert.DeserializeObject<List<ProjectEntry>>(response);
         }
 
         public async Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int projectId)
         {
-            var response = await Get($"api/v4/projects/{projectId}/subprojects.json");
+            var response = await http.Get($"api/v4/projects/{projectId}/subprojects.json");
             return JsonConvert.DeserializeObject<List<ProjectEntry>>(response);
         }
 
         public async Task<ProjectDetails> GetProject(int projectId)
         {
-            var response = await Get($"api/v4/projects/{projectId}.json");
+            var response = await http.Get($"api/v4/projects/{projectId}.json");
             return JsonConvert.DeserializeObject<ProjectDetails>(response);
         }
 
-        public async Task<int> CreateProject(string name, int parentId = 0, string tags = null, string notes = null)
+        public async Task<int> CreateProject(CreateProjectRequest request)
         {
-            var body = JsonConvert.SerializeObject(new
-            {
-                name = name,
-                parent_id = parentId,
-                tags = tags,
-                notes = notes
-            });
-
-            var response = await Post("api/v4/projects.json", body);
+            var body = JsonConvert.SerializeObject(request);
+            var response = await http.Post("api/v4/projects.json", body);
             var created = JsonConvert.DeserializeObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
-        public async Task UpdateProject(ProjectDetails details)
+        public async Task UpdateProject(int id, UpdateProjectRequest request)
         {
-            var body = JsonConvert.SerializeObject(new
-            {
-                name = details.Name,
-                tags = details.Tags,
-                notes = details.Notes
-            });
-
-            await Put($"api/v4/projects/{details.Id}.json", body);
+            var body = JsonConvert.SerializeObject(request);
+            await http.Put($"api/v4/projects/{id}.json", body);
         }
 
         public async Task ChangeProjectParent(int projectId, int newParentId)
         {
-            var body = JsonConvert.SerializeObject(new
+            var body = JsonConvert.SerializeObject(new ChangeProjectParent
             {
-                parent_id = newParentId
+                Parent_Id = newParentId
             });
 
-            await Put($"api/v4/projects/{projectId}/change_parent.json", body);
+            await http.Put($"api/v4/projects/{projectId}/change_parent.json", body);
         }
 
         public async Task ArchiveProject(int projectId)
         {
-            await Put($"api/v4/projects/{projectId}/archive.json");
+            await http.Put($"api/v4/projects/{projectId}/archive.json");
         }
 
         public async Task UnarchiveProject(int projectId)
         {
-            await Put($"api/v4/projects/{projectId}/unarchive.json");
+            await http.Put($"api/v4/projects/{projectId}/unarchive.json");
         }
 
         public async Task DeleteProject(int projectId)
         {
-            await Delete($"api/v4/projects/{projectId}.json");
+            await http.Delete($"api/v4/projects/{projectId}.json");
         }
     }
 }
