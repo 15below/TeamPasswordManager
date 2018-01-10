@@ -33,9 +33,9 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Get the password details including the password value itself.
         /// </summary>
-        /// <param name="passwordId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task<PasswordDetails> GetPassword(int passwordId);
+        Task<PasswordDetails> GetPassword(int id);
 
         /// <summary>
         /// Search for a password entry by name.
@@ -111,9 +111,9 @@ namespace TeamPasswordManagerClient
             return JsonConvert.DeserializeObject<List<PasswordEntry>>(response);
         }
 
-        public async Task<PasswordDetails> GetPassword(int passwordId)
+        public async Task<PasswordDetails> GetPassword(int id)
         {
-            var response = await http.Get($"api/v4/passwords/{passwordId}.json");
+            var response = await http.Get($"api/v4/passwords/{id}.json");
             return JsonConvert.DeserializeObject<PasswordDetails>(response);
         }
 

@@ -13,24 +13,23 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Create a new personal password.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="password"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         Task<int> CreatePassword(CreateMyPasswordRequest request);
 
         /// <summary>
         /// Delete personal password.
         /// </summary>
-        /// <param name="myPasswordId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task DeletePassword(int myPasswordId);
+        Task DeletePassword(int id);
 
         /// <summary>
         /// Get personal password details.
         /// </summary>
-        /// <param name="myPasswordId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task<MyPasswordDetails> GetPassword(int myPasswordId);
+        Task<MyPasswordDetails> GetPassword(int id);
 
         /// <summary>
         /// Get personal password details by name.
@@ -81,9 +80,9 @@ namespace TeamPasswordManagerClient
             return JsonConvert.DeserializeObject<List<MyPasswordEntry>>(response);
         }
 
-        public async Task<MyPasswordDetails> GetPassword(int personalPasswordId)
+        public async Task<MyPasswordDetails> GetPassword(int id)
         {
-            var response = await http.Get($"api/v4/my_passwords/{personalPasswordId}.json");
+            var response = await http.Get($"api/v4/my_passwords/{id}.json");
             return JsonConvert.DeserializeObject<MyPasswordDetails>(response);
         }
 
@@ -113,9 +112,9 @@ namespace TeamPasswordManagerClient
             await http.Put($"api/v4/my_passwords/{id}.json", body);
         }
 
-        public async Task DeletePassword(int personalPasswordId)
+        public async Task DeletePassword(int id)
         {
-            await http.Delete($"api/v4/my_passwords/{personalPasswordId}.json");
+            await http.Delete($"api/v4/my_passwords/{id}.json");
         }
     }
 }

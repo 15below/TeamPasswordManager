@@ -11,10 +11,10 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Add a user to the group.
         /// </summary>
-        /// <param name="groupId"></param>
+        /// <param name="id"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task AddUserToGroup(int groupId, int userId);
+        Task AddUserToGroup(int id, int userId);
 
         /// <summary>
         /// Create a new group. Will return a WebException (409) Conflict if there is an existing group with that name.
@@ -26,16 +26,16 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Delete a group.
         /// </summary>
-        /// <param name="groupId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task DeleteGroup(int groupId);
+        Task DeleteGroup(int id);
 
         /// <summary>
         /// Get group details
         /// </summary>
-        /// <param name="groupId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task<GroupDetails> GetGroup(int groupId);
+        Task<GroupDetails> GetGroup(int id);
 
         /// <summary>
         /// List all groups.
@@ -54,18 +54,18 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Remove a user from the group.
         /// </summary>
-        /// <param name="groupId"></param>
+        /// <param name="id"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task RemoveUserFromGroup(int groupId, int userId);
+        Task RemoveUserFromGroup(int id, int userId);
 
         /// <summary>
         /// Update a group name.
         /// </summary>
-        /// <param name="groupId"></param>
+        /// <param name="id"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        Task UpdateGroup(int groupId, string name);
+        Task UpdateGroup(int id, string name);
     }
 
     internal class TpmGroupClient : ITpmGroupClient
@@ -88,9 +88,9 @@ namespace TeamPasswordManagerClient
             return JsonConvert.DeserializeObject<List<Group>>(response);
         }
 
-        public async Task<GroupDetails> GetGroup(int groupId)
+        public async Task<GroupDetails> GetGroup(int id)
         {
-            var response = await http.Get($"api/v4/groups/{groupId}.json");
+            var response = await http.Get($"api/v4/groups/{id}.json");
             return JsonConvert.DeserializeObject<GroupDetails>(response);
         }
 
@@ -106,29 +106,29 @@ namespace TeamPasswordManagerClient
             return Int32.Parse(created.Id);
         }
 
-        public async Task UpdateGroup(int groupId, string name)
+        public async Task UpdateGroup(int id, string name)
         {
             var body = JsonConvert.SerializeObject(new UpdateGroupRequest
             {
                 Name = name
             });
 
-            await http.Put($"api/v4/groups/{groupId}.json", body);
+            await http.Put($"api/v4/groups/{id}.json", body);
         }
 
-        public async Task AddUserToGroup(int groupId, int userId)
+        public async Task AddUserToGroup(int id, int userId)
         {
-            await http.Put($"api/v4/groups/{groupId}/add_user/{userId}.json");
+            await http.Put($"api/v4/groups/{id}/add_user/{userId}.json");
         }
 
-        public async Task RemoveUserFromGroup(int groupId, int userId)
+        public async Task RemoveUserFromGroup(int id, int userId)
         {
-            await http.Put($"api/v4/groups/{groupId}/delete_user/{userId}.json");
+            await http.Put($"api/v4/groups/{id}/delete_user/{userId}.json");
         }
 
-        public async Task DeleteGroup(int groupId)
+        public async Task DeleteGroup(int id)
         {
-            await http.Delete($"api/v4/groups/{groupId}.json");
+            await http.Delete($"api/v4/groups/{id}.json");
         }
     }
 }

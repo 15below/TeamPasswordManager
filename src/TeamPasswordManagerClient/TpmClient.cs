@@ -26,15 +26,13 @@
 
         public TpmClient(TpmConfig config)
         {
-            this.Http = new TpmHttp(config);
-            this.Passwords = new TpmPasswordClient(Http);
-            this.MyPasswords = new TpmMyPasswordClient(Http);
-            this.Projects = new TpmProjectClient(Http);
-            this.Users = new TpmUserClient(Http);
-            this.Groups = new TpmGroupClient(Http);
+            var http = new TpmHttp(config);
+            this.Passwords = new TpmPasswordClient(http);
+            this.MyPasswords = new TpmMyPasswordClient(http);
+            this.Projects = new TpmProjectClient(http);
+            this.Users = new TpmUserClient(http);
+            this.Groups = new TpmGroupClient(http);
         }
-
-        internal TpmHttp Http { get; }
 
         public ITpmPasswordClient Passwords { get; private set; }
 

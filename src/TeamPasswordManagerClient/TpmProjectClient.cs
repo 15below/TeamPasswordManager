@@ -13,17 +13,17 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Archive a project.
         /// </summary>
-        /// <param name="projectId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task ArchiveProject(int projectId);
+        Task ArchiveProject(int id);
 
         /// <summary>
         /// Move a project to a different location.
         /// </summary>
-        /// <param name="projectId"></param>
+        /// <param name="id"></param>
         /// <param name="newParentId"></param>
         /// <returns></returns>
-        Task ChangeProjectParent(int projectId, int newParentId);
+        Task ChangeProjectParent(int id, int newParentId);
 
         /// <summary>
         /// Create a new project. Will return a WebException (409) Conflict if there is an existing project with that name in this location.
@@ -35,16 +35,16 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Delete a project. Will return a WebException (403) Forbidden if there are any sub-projects.
         /// </summary>
-        /// <param name="projectId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task DeleteProject(int projectId);
+        Task DeleteProject(int id);
 
         /// <summary>
         /// Get project details.
         /// </summary>
-        /// <param name="projectId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task<ProjectDetails> GetProject(int projectId);
+        Task<ProjectDetails> GetProject(int id);
 
         /// <summary>
         /// List all projects in the root.
@@ -56,9 +56,9 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// List all sub-projects of a given project.
         /// </summary>
-        /// <param name="projectId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int projectId);
+        Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int id);
 
         /// <summary>
         /// Get a page of project entries in the root.
@@ -70,9 +70,9 @@ namespace TeamPasswordManagerClient
         /// <summary>
         /// Unarchive a project.
         /// </summary>
-        /// <param name="projectId"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        Task UnarchiveProject(int projectId);
+        Task UnarchiveProject(int id);
 
         /// <summary>
         /// Updates the project with the supplied details. Only non-null values will be applied.
@@ -103,15 +103,15 @@ namespace TeamPasswordManagerClient
             return JsonConvert.DeserializeObject<List<ProjectEntry>>(response);
         }
 
-        public async Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int projectId)
+        public async Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int id)
         {
-            var response = await http.Get($"api/v4/projects/{projectId}/subprojects.json");
+            var response = await http.Get($"api/v4/projects/{id}/subprojects.json");
             return JsonConvert.DeserializeObject<List<ProjectEntry>>(response);
         }
 
-        public async Task<ProjectDetails> GetProject(int projectId)
+        public async Task<ProjectDetails> GetProject(int id)
         {
-            var response = await http.Get($"api/v4/projects/{projectId}.json");
+            var response = await http.Get($"api/v4/projects/{id}.json");
             return JsonConvert.DeserializeObject<ProjectDetails>(response);
         }
 
@@ -129,29 +129,29 @@ namespace TeamPasswordManagerClient
             await http.Put($"api/v4/projects/{id}.json", body);
         }
 
-        public async Task ChangeProjectParent(int projectId, int newParentId)
+        public async Task ChangeProjectParent(int id, int newParentId)
         {
             var body = JsonConvert.SerializeObject(new ChangeProjectParent
             {
                 Parent_Id = newParentId
             });
 
-            await http.Put($"api/v4/projects/{projectId}/change_parent.json", body);
+            await http.Put($"api/v4/projects/{id}/change_parent.json", body);
         }
 
-        public async Task ArchiveProject(int projectId)
+        public async Task ArchiveProject(int id)
         {
-            await http.Put($"api/v4/projects/{projectId}/archive.json");
+            await http.Put($"api/v4/projects/{id}/archive.json");
         }
 
-        public async Task UnarchiveProject(int projectId)
+        public async Task UnarchiveProject(int id)
         {
-            await http.Put($"api/v4/projects/{projectId}/unarchive.json");
+            await http.Put($"api/v4/projects/{id}/unarchive.json");
         }
 
-        public async Task DeleteProject(int projectId)
+        public async Task DeleteProject(int id)
         {
-            await http.Delete($"api/v4/projects/{projectId}.json");
+            await http.Delete($"api/v4/projects/{id}.json");
         }
     }
 }
