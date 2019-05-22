@@ -119,46 +119,46 @@ namespace TeamPasswordManagerClient
         public async Task<IEnumerable<UserEntry>> ListUsers(int page = 1)
         {
             var response = (page == 1) ? await http.Get("api/v4/users.json") : await http.Get($"api/v4/users/page/{page}.json");
-            return JsonConvert.DeserializeObject<List<UserEntry>>(response);
+            return Json.ToObject<List<UserEntry>>(response);
         }
 
         public async Task<UserDetails> GetUser(int id)
         {
             var response = await http.Get($"api/v4/users/{id}.json");
-            return JsonConvert.DeserializeObject<UserDetails>(response);
+            return Json.ToObject<UserDetails>(response);
         }
 
         public async Task<UserDetails> WhoAmI()
         {
             var response = await http.Get($"api/v4/users/me.json");
-            return JsonConvert.DeserializeObject<UserDetails>(response);
+            return Json.ToObject<UserDetails>(response);
         }
 
         public async Task<int> CreateLdapUser(CreateLdapUserRequest request)
         {
-            var body = JsonConvert.SerializeObject(request);
+            var body = Json.ToString(request);
             var response = await http.Post("api/v4/users.json", body);
-            var created = JsonConvert.DeserializeObject<Created>(response);
+            var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task<int> CreateNormalUser(CreateNormalUserRequest request)
         {
-            var body = JsonConvert.SerializeObject(request);
+            var body = Json.ToString(request);
             var response = await http.Post("api/v4/users.json", body);
-            var created = JsonConvert.DeserializeObject<Created>(response);
+            var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task UpdateUser(int id, UpdateUserRequest request)
         {
-            var body = JsonConvert.SerializeObject(request);
+            var body = Json.ToString(request);
             await http.Put($"api/v4/users/{id}.json", body);
         }
 
         public async Task UpdatePassword(int id, string password)
         {
-            var body = JsonConvert.SerializeObject(new
+            var body = Json.ToString(new
             {
                 password = password
             });
@@ -178,7 +178,7 @@ namespace TeamPasswordManagerClient
 
         public async Task ConvertToLdap(int id, string loginDN)
         {
-            var body = JsonConvert.SerializeObject(new ConvertToLdapRequest
+            var body = Json.ToString(new ConvertToLdapRequest
             {
                 LoginDN = loginDN
             });

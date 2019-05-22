@@ -100,38 +100,38 @@ namespace TeamPasswordManagerClient
         public async Task<IEnumerable<ProjectEntry>> ListProjects(int page = 1)
         {
             var response = (page == 1) ? await http.Get("api/v4/projects.json") : await http.Get($"api/v4/projects/page/{page}.json");
-            return JsonConvert.DeserializeObject<List<ProjectEntry>>(response);
+            return Json.ToObject<List<ProjectEntry>>(response);
         }
 
         public async Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int id)
         {
             var response = await http.Get($"api/v4/projects/{id}/subprojects.json");
-            return JsonConvert.DeserializeObject<List<ProjectEntry>>(response);
+            return Json.ToObject<List<ProjectEntry>>(response);
         }
 
         public async Task<ProjectDetails> GetProject(int id)
         {
             var response = await http.Get($"api/v4/projects/{id}.json");
-            return JsonConvert.DeserializeObject<ProjectDetails>(response);
+            return Json.ToObject<ProjectDetails>(response);
         }
 
         public async Task<int> CreateProject(CreateProjectRequest request)
         {
-            var body = JsonConvert.SerializeObject(request);
+            var body = Json.ToString(request);
             var response = await http.Post("api/v4/projects.json", body);
-            var created = JsonConvert.DeserializeObject<Created>(response);
+            var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task UpdateProject(int id, UpdateProjectRequest request)
         {
-            var body = JsonConvert.SerializeObject(request);
+            var body = Json.ToString(request);
             await http.Put($"api/v4/projects/{id}.json", body);
         }
 
         public async Task ChangeProjectParent(int id, int newParentId)
         {
-            var body = JsonConvert.SerializeObject(new ChangeProjectParent
+            var body = Json.ToString(new ChangeProjectParent
             {
                 Parent_Id = newParentId
             });

@@ -85,30 +85,30 @@ namespace TeamPasswordManagerClient
         public async Task<IEnumerable<Group>> ListGroups(int page = 1)
         {
             var response = (page == 1) ? await http.Get("api/v4/groups.json") : await http.Get($"api/v4/groups/page/{page}.json");
-            return JsonConvert.DeserializeObject<List<Group>>(response);
+            return Json.ToObject<List<Group>>(response);
         }
 
         public async Task<GroupDetails> GetGroup(int id)
         {
             var response = await http.Get($"api/v4/groups/{id}.json");
-            return JsonConvert.DeserializeObject<GroupDetails>(response);
+            return Json.ToObject<GroupDetails>(response);
         }
 
         public async Task<int> CreateGroup(string name)
         {
-            var body = JsonConvert.SerializeObject(new CreateGroupRequest
+            var body = Json.ToString(new CreateGroupRequest
             {
                 Name = name
             });
 
             var response = await http.Post("api/v4/groups.json", body);
-            var created = JsonConvert.DeserializeObject<Created>(response);
+            var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task UpdateGroup(int id, string name)
         {
-            var body = JsonConvert.SerializeObject(new UpdateGroupRequest
+            var body = Json.ToString(new UpdateGroupRequest
             {
                 Name = name
             });

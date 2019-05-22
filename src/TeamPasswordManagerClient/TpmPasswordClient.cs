@@ -97,7 +97,7 @@ namespace TeamPasswordManagerClient
         public async Task<string> GeneratePassword()
         {
             var response = await http.Get($"api/v4/generate_password.json");
-            return JsonConvert.DeserializeObject<GeneratedPassword>(response).Password;
+            return Json.ToObject<GeneratedPassword>(response).Password;
         }
 
         public async Task<IEnumerable<PasswordEntry>> ListAllPasswords(int projectId, int pageSize = 20)
@@ -108,13 +108,13 @@ namespace TeamPasswordManagerClient
         public async Task<IEnumerable<PasswordEntry>> ListPasswords(int projectId, int page = 1)
         {
             var response = (page == 1) ? await http.Get($"api/v4/projects/{projectId}/passwords.json") : await http.Get($"api/v4/projects/{projectId}/passwords/page/{page}.json");
-            return JsonConvert.DeserializeObject<List<PasswordEntry>>(response);
+            return Json.ToObject<List<PasswordEntry>>(response);
         }
 
         public async Task<PasswordDetails> GetPassword(int id)
         {
             var response = await http.Get($"api/v4/passwords/{id}.json");
-            return JsonConvert.DeserializeObject<PasswordDetails>(response);
+            return Json.ToObject<PasswordDetails>(response);
         }
 
         public async Task<PasswordEntry> SearchPassword(string projectName, string passwordName)
@@ -122,7 +122,7 @@ namespace TeamPasswordManagerClient
             var urlencodedProject = HttpUtility.UrlEncode($"[{projectName}]");
             var urlencodedPassword = HttpUtility.UrlEncode($"[{passwordName}]");
             var response = await http.Get($"api/v4/passwords/search/in:{urlencodedProject}+name:{urlencodedPassword}.json");
-            var entry = JsonConvert.DeserializeObject<List<PasswordEntry>>(response).FirstOrDefault();
+            var entry = Json.ToObject<List<PasswordEntry>>(response).FirstOrDefault();
             if (entry == null)
             {
                 throw new Exception("Response did not contain a match");
@@ -132,15 +132,15 @@ namespace TeamPasswordManagerClient
 
         public async Task<int> CreatePassword(CreatePasswordRequest request)
         {
-            var body = JsonConvert.SerializeObject(request);
+            var body = Json.ToString(request);
             var response = await http.Post("api/v4/passwords.json", body);
-            var created = JsonConvert.DeserializeObject<Created>(response);
+            var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
 
         public async Task UpdatePassword(int id, UpdatePasswordRequest details)
         {
-            var body = JsonConvert.SerializeObject(details);
+            var body = Json.ToString(details);
             await http.Put($"api/v4/passwords/{id}.json", body);
         }
 
