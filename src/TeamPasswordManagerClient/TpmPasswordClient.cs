@@ -36,6 +36,13 @@ namespace TeamPasswordManagerClient
         /// <param name="id"></param>
         /// <returns></returns>
         Task<PasswordDetails> GetPassword(int id);
+        
+        /// <summary>
+        /// Search for a password entry by name.
+        /// </summary>
+        /// <param name="passwordName"></param>
+        /// <returns></returns>
+        Task<IEnumerable<PasswordEntry>> FindPassword(string passwordName);
 
         /// <summary>
         /// Search for a password entry by name.
@@ -43,6 +50,7 @@ namespace TeamPasswordManagerClient
         /// <param name="projectName">NOTE: Spaces in a project name will fail to return any results</param>
         /// <param name="passwordName"></param>
         /// <returns></returns>
+        [Obsolete("This method is obsolete. Call FindPassword instead.", true)]
         Task<PasswordEntry> SearchPassword(string projectName, string passwordName);
 
         /// <summary>
@@ -117,6 +125,14 @@ namespace TeamPasswordManagerClient
             return Json.ToObject<PasswordDetails>(response);
         }
 
+        public async Task<IEnumerable<PasswordEntry>> FindPassword(string passwordName)
+        {
+            var urlencodedPassword = HttpUtility.UrlEncode($"\"{passwordName}\"");
+            var response = await http.Get($"api/v4/passwords/search/name:{urlencodedPassword}.json");
+            return Json.ToObject<List<PasswordEntry>>(response);
+        }
+
+        [Obsolete("This method is obsolete. Call FindPassword instead.", true)]
         public async Task<PasswordEntry> SearchPassword(string projectName, string passwordName)
         {
             var urlencodedProject = HttpUtility.UrlEncode($"[{projectName}]");
