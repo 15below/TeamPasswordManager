@@ -52,33 +52,26 @@ namespace TeamPasswordManagerClient
             return await ReadResponse(request);
         }
 
-        public WebRequest BuildRequest(string method, string url)
-        {
-            var timestamp = CurrentTimeStamp();
-            var request = WebRequest.Create(baseUrl + url);
-            request.Method = method;
-            request.ContentType = "application/json; charset=utf-8";
-            request.Headers.Add("X-Public-Key", publicKey);
-            request.Headers.Add("X-Request-Hash", Hash(timestamp, url));
-            request.Headers.Add("X-Request-Timestamp", timestamp.ToString());
-            return request;
-        }
 
-        public WebRequest BuildRequest(string method, string url, string body)
+        public WebRequest BuildRequest(string method, string url, string body = null)
         {
+            var fullUrl = $"{baseUrl}{url}";
             var timestamp = CurrentTimeStamp();
-            var request = WebRequest.Create(baseUrl + url);
+            var request = WebRequest.Create(fullUrl);
             request.Method = method;
             request.ContentType = "application/json; charset=utf-8";
             request.Headers.Add("X-Public-Key", publicKey);
             request.Headers.Add("X-Request-Hash", Hash(timestamp, url, body));
             request.Headers.Add("X-Request-Timestamp", timestamp.ToString());
 
-            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+            if (!string.IsNullOrWhiteSpace(body))
             {
-                streamWriter.Write(body);
-                streamWriter.Flush();
-                streamWriter.Close();
+                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                {
+                    streamWriter.Write(body);
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                }
             }
 
             return request;
@@ -116,7 +109,7 @@ namespace TeamPasswordManagerClient
             return all;
         }
 
-        private string Hash(long timestamp, string url, string body = null)
+        private string Hash(long timestamp, string url, string body)
         {
             var keyBytes = Encoding.UTF8.GetBytes(privateKey);
             var data = url + timestamp + (body ?? "");
