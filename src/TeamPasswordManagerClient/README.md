@@ -1,6 +1,6 @@
 # TeamPasswordManager
 
-C# Client Library for TeamPasswordManager API v4, v5 or V6: http://teampasswordmanager.com/docs/api/
+C# Client Library for TeamPasswordManager API v4: http://teampasswordmanager.com/docs/api/
 
 Basic usage is as follows:
 
@@ -8,7 +8,7 @@ Basic usage is as follows:
 
     var config = new TpmConfig
     {
-        BaseUrl = "https://tpm-dev.15below.local/index.php/api/V5",
+        BaseUrl = "https://tpm-dev.15below.local/index.php/",
         PublicKey = "5650a2df5b56e81926e06b33ad52c9c541c2aa30e474aa7574654ceb9123056e",
         PrivateKey = "f271d7c2197805dd73ffa1e11c0c25973177ae7b2244984f808dca6c610abe8e"
     };

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("15below Ltd")]
 [assembly: AssemblyProduct("TeamPasswordManagerClient")]
-[assembly: AssemblyCopyright("Copyright © 15below 2019")]
+[assembly: AssemblyCopyright("Copyright © 15below 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyInformationalVersion("2.0.0.0")]
+[assembly: AssemblyVersion("2.0.1.0")]
+[assembly: AssemblyInformationalVersion("2.0.1.0")]
