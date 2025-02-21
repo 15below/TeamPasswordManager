@@ -99,26 +99,26 @@ namespace TeamPasswordManagerClient
 
         public async Task<IEnumerable<ProjectEntry>> ListProjects(int page = 1)
         {
-            var response = (page == 1) ? await http.Get("api/v4/projects.json") : await http.Get($"api/v4/projects/page/{page}.json");
+            var response = (page == 1) ? await http.Get("projects.json") : await http.Get($"projects/page/{page}.json");
             return Json.ToObject<List<ProjectEntry>>(response);
         }
 
         public async Task<IEnumerable<ProjectEntry>> ListAllSubProjects(int id)
         {
-            var response = await http.Get($"api/v4/projects/{id}/subprojects.json");
+            var response = await http.Get($"projects/{id}/subprojects.json");
             return Json.ToObject<List<ProjectEntry>>(response);
         }
 
         public async Task<ProjectDetails> GetProject(int id)
         {
-            var response = await http.Get($"api/v4/projects/{id}.json");
+            var response = await http.Get($"projects/{id}.json");
             return Json.ToObject<ProjectDetails>(response);
         }
 
         public async Task<int> CreateProject(CreateProjectRequest request)
         {
             var body = Json.ToString(request);
-            var response = await http.Post("api/v4/projects.json", body);
+            var response = await http.Post("projects.json", body);
             var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
@@ -126,7 +126,7 @@ namespace TeamPasswordManagerClient
         public async Task UpdateProject(int id, UpdateProjectRequest request)
         {
             var body = Json.ToString(request);
-            await http.Put($"api/v4/projects/{id}.json", body);
+            await http.Put($"projects/{id}.json", body);
         }
 
         public async Task ChangeProjectParent(int id, int newParentId)
@@ -136,22 +136,22 @@ namespace TeamPasswordManagerClient
                 Parent_Id = newParentId
             });
 
-            await http.Put($"api/v4/projects/{id}/change_parent.json", body);
+            await http.Put($"projects/{id}/change_parent.json", body);
         }
 
         public async Task ArchiveProject(int id)
         {
-            await http.Put($"api/v4/projects/{id}/archive.json");
+            await http.Put($"projects/{id}/archive.json");
         }
 
         public async Task UnarchiveProject(int id)
         {
-            await http.Put($"api/v4/projects/{id}/unarchive.json");
+            await http.Put($"projects/{id}/unarchive.json");
         }
 
         public async Task DeleteProject(int id)
         {
-            await http.Delete($"api/v4/projects/{id}.json");
+            await http.Delete($"projects/{id}.json");
         }
     }
 }

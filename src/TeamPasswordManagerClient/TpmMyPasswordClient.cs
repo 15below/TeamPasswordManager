@@ -76,20 +76,20 @@ namespace TeamPasswordManagerClient
 
         public async Task<IEnumerable<MyPasswordEntry>> ListPasswords(int page = 1)
         {
-            var response = (page == 1) ? await http.Get($"api/v4/my_passwords.json") : await http.Get($"api/v4/my_passwords/page/{page}.json");
+            var response = (page == 1) ? await http.Get($"my_passwords.json") : await http.Get($"my_passwords/page/{page}.json");
             return Json.ToObject<List<MyPasswordEntry>>(response);
         }
 
         public async Task<MyPasswordDetails> GetPassword(int id)
         {
-            var response = await http.Get($"api/v4/my_passwords/{id}.json");
+            var response = await http.Get($"my_passwords/{id}.json");
             return Json.ToObject<MyPasswordDetails>(response);
         }
 
         public async Task<MyPasswordEntry> SearchPassword(string passwordName)
         {
             var urlencodedPassword = HttpUtility.UrlEncode($"[{passwordName}]");
-            var response = await http.Get($"api/v4/my_passwords/search/name:{urlencodedPassword}.json");
+            var response = await http.Get($"my_passwords/search/name:{urlencodedPassword}.json");
             var entry = Json.ToObject<List<MyPasswordEntry>>(response).FirstOrDefault();
             if (entry == null)
             {
@@ -101,7 +101,7 @@ namespace TeamPasswordManagerClient
         public async Task<int> CreatePassword(CreateMyPasswordRequest request)
         {
             var body = Json.ToString(request);
-            var response = await http.Post("api/v4/my_passwords.json", body);
+            var response = await http.Post("my_passwords.json", body);
             var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
@@ -109,12 +109,12 @@ namespace TeamPasswordManagerClient
         public async Task UpdatePassword(int id, UpdateMyPasswordRequest request)
         {
             var body = Json.ToString(request);
-            await http.Put($"api/v4/my_passwords/{id}.json", body);
+            await http.Put($"my_passwords/{id}.json", body);
         }
 
         public async Task DeletePassword(int id)
         {
-            await http.Delete($"api/v4/my_passwords/{id}.json");
+            await http.Delete($"my_passwords/{id}.json");
         }
     }
 }

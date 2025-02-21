@@ -20,6 +20,16 @@ namespace TeamPasswordManagerClient
             this.publicKey = config.PublicKey;
             this.privateKey = config.PrivateKey;
             this.baseUrl = config.BaseUrl;
+
+            if (!baseUrl.EndsWith("/"))
+            {
+                baseUrl += "/";
+            }
+
+            if (!baseUrl.Contains("/api/"))
+            {
+                baseUrl += "api/v4/";
+            }
         }
 
         public async Task<string> Get(string url)
@@ -56,12 +66,13 @@ namespace TeamPasswordManagerClient
         public WebRequest BuildRequest(string method, string url, string body = null)
         {
             var fullUrl = $"{baseUrl}{url}";
+            var urlToHash = fullUrl.Substring(fullUrl.IndexOf("api/", StringComparison.InvariantCultureIgnoreCase));
             var timestamp = CurrentTimeStamp();
             var request = WebRequest.Create(fullUrl);
             request.Method = method;
             request.ContentType = "application/json; charset=utf-8";
             request.Headers.Add("X-Public-Key", publicKey);
-            request.Headers.Add("X-Request-Hash", Hash(timestamp, url, body));
+            request.Headers.Add("X-Request-Hash", Hash(timestamp, urlToHash, body));
             request.Headers.Add("X-Request-Timestamp", timestamp.ToString());
 
             if (!string.IsNullOrWhiteSpace(body))

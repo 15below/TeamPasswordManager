@@ -84,13 +84,13 @@ namespace TeamPasswordManagerClient
 
         public async Task<IEnumerable<Group>> ListGroups(int page = 1)
         {
-            var response = (page == 1) ? await http.Get("api/v4/groups.json") : await http.Get($"api/v4/groups/page/{page}.json");
+            var response = (page == 1) ? await http.Get("groups.json") : await http.Get($"groups/page/{page}.json");
             return Json.ToObject<List<Group>>(response);
         }
 
         public async Task<GroupDetails> GetGroup(int id)
         {
-            var response = await http.Get($"api/v4/groups/{id}.json");
+            var response = await http.Get($"groups/{id}.json");
             return Json.ToObject<GroupDetails>(response);
         }
 
@@ -101,7 +101,7 @@ namespace TeamPasswordManagerClient
                 Name = name
             });
 
-            var response = await http.Post("api/v4/groups.json", body);
+            var response = await http.Post("groups.json", body);
             var created = Json.ToObject<Created>(response);
             return Int32.Parse(created.Id);
         }
@@ -113,22 +113,22 @@ namespace TeamPasswordManagerClient
                 Name = name
             });
 
-            await http.Put($"api/v4/groups/{id}.json", body);
+            await http.Put($"groups/{id}.json", body);
         }
 
         public async Task AddUserToGroup(int id, int userId)
         {
-            await http.Put($"api/v4/groups/{id}/add_user/{userId}.json");
+            await http.Put($"groups/{id}/add_user/{userId}.json");
         }
 
         public async Task RemoveUserFromGroup(int id, int userId)
         {
-            await http.Put($"api/v4/groups/{id}/delete_user/{userId}.json");
+            await http.Put($"groups/{id}/delete_user/{userId}.json");
         }
 
         public async Task DeleteGroup(int id)
         {
-            await http.Delete($"api/v4/groups/{id}.json");
+            await http.Delete($"groups/{id}.json");
         }
     }
 }
